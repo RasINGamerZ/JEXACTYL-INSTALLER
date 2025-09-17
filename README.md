@@ -53,7 +53,7 @@ sudo systemctl enable --now redis-server`
 
 `nano /etc/nginx/sites-available/panel.conf`
 
-`server {
+```server {
     listen 80;
     server_name <domain>;
     return 301 https://$server_name$request_uri;
@@ -114,7 +114,7 @@ server {
     location ~ /\.ht {
         deny all;
     }
-}`
+}```
 
 `ln -s /etc/nginx/sites-available/panel.conf /etc/nginx/sites-enabled/panel.conf`
 
