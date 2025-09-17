@@ -18,7 +18,7 @@ password:- root
 
 then paste
 
-# Jexactyl Queue Worker File
+``# Jexactyl Queue Worker File
 # ----------------------------------
 
 [Unit]
@@ -34,7 +34,7 @@ StartLimitBurst=30
 RestartSec=5s
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target``
 
 --------------------------------------------------------
 
