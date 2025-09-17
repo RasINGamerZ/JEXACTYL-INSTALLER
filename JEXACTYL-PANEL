@@ -48,74 +48,64 @@ done
 echo -e "${GRN} Thanks for Subscribing! If Not Do It Rn${NC}\n"
 sleep 1
 
-echo -e "${YEL}X-> Installing Docker Compose...${NC}"
+# -------------------------------------------------------
+# Update system and install Docker Compose
+# -------------------------------------------------------
+echo -e "${YEL}X-> Installing Docker & Docker Compose...${NC}"
 apt update && apt upgrade -y
-apt install docker-compose -y
+apt install -y docker-compose software-properties-common curl apt-transport-https ca-certificates gnupg lsb-release
 
-#!/bin/bash
-
-apt -y install software-properties-common curl apt-transport-https ca-certificates gnupg lsb-release
-
+# -------------------------------------------------------
+# Add PHP repo & Redis repo
+# -------------------------------------------------------
+echo -e "${YEL}X-> Adding PHP and Redis repositories...${NC}"
 LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
+curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb \$(lsb_release -cs) main" | tee /etc/apt/sources.list.d/redis.list
 
-# redis.io repo - works for Debian & Ubuntu
-curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
-echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
-
-# DONE 
-
-#!/bin/bash
-
+# -------------------------------------------------------
+# Install required packages
+# -------------------------------------------------------
+echo -e "${YEL}X-> Installing PHP, MariaDB, Nginx, Redis, Composer...${NC}"
 apt update
-apt -y install php8.1 php8.1-{cli,gd,mysql,pdo,mbstring,tokenizer,bcmath,xml,fpm,curl,zip} mariadb-server nginx tar unzip git redis
-curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+apt -y install php8.1 php8.1-{cli,gd,mysql,pdo,mbstring,tokenizer,bcmath,xml,fpm,curl,zip} \
+               mariadb-server nginx tar unzip git redis
+curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# -------------------------------------------------------
+# Setup Jexactyl panel
+# -------------------------------------------------------
 echo -e "${CYN}X-> Setting up JEXACTYL Panel directories...${NC}"
 mkdir -p /var/www/jexactyl
-cd /var/www/jexactyl|| exit
+cd /var/www/jexactyl || exit
 
-echo -e "${CYN}X-> DOWNLOADING PANEL...${NC}"
-
+echo -e "${CYN}X-> Downloading panel...${NC}"
 curl -Lo panel.tar.gz https://github.com/jexactyl/jexactyl/releases/latest/download/panel.tar.gz
 tar -xzvf panel.tar.gz
 chmod -R 755 storage/* bootstrap/cache/
 
-echo -e "${CYN}X-> database setup...${NC}"
+# -------------------------------------------------------
+# Database setup (manual root password entry still needed)
+# -------------------------------------------------------
+echo -e "${CYN}X-> Database setup...${NC}"
+echo -e "${RED}⚠️ You need to set up MySQL manually. Run:${NC}"
+echo -e "   mysql -u root -p"
+echo -e "   CREATE USER 'jexactyl'@'127.0.0.1' IDENTIFIED BY 'yourPassword';
+echo -e "   CREATE DATABASE panel;
+echo -e "   GRANT ALL PRIVILEGES ON panel.* TO 'jexactyl'@'127.0.0.1' WITH GRANT OPTION;
+echo -e "  exit
 
-mysql -u root -p
-
-echo -e "${CYN}X-> Create configuration file...${NC}"
-
+# -------------------------------------------------------
+# Laravel setup
+# -------------------------------------------------------
 cp .env.example .env
-
-
-echo -e "${CYN}X-> Install Composer packages...${NC}"
-
 composer install --no-dev --optimize-autoloader
-
-
-echo -e "${CYN}X-> gen a key...${NC}"
-
 php artisan key:generate --force
 
-echo -e "${CYN}X-> Setup user and panel...${NC}"
-
 php artisan p:environment:setup
-
-echo -e "${CYN}X-> Setup database...${NC}"
-
 php artisan p:environment:database
-
-echo -e "${CYN}X-> Starting database...${NC}"
-
 php artisan migrate --seed --force
-
-echo -e "${CYN}X-> Create admin user...${NC}"
-
 php artisan p:user:make
 
 
-
-
-
-
+echo -e "${YEL}✅ Successfully completed installation! Next: configure Nginx & SSL.${NC}"
