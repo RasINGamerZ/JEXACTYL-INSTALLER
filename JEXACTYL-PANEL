@@ -90,7 +90,7 @@ chmod -R 755 storage/* bootstrap/cache/
 echo -e "${CYN}X-> Database setup...${NC}"
 echo -e "${RED}⚠️ You need to set up MySQL manually. Run:${NC}"
 echo -e "   mysql -u root -p"
-echo -e "   CREATE USER 'jexactyl'@'127.0.0.1' IDENTIFIED BY 'yourPassword';
+echo -e "   CREATE USER 'jexactyl'@'127.0.0.1' IDENTIFIED BY 'root';
 echo -e "   CREATE DATABASE panel;
 echo -e "   GRANT ALL PRIVILEGES ON panel.* TO 'jexactyl'@'127.0.0.1' WITH GRANT OPTION;
 echo -e "  exit
